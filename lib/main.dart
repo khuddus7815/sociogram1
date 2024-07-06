@@ -33,54 +33,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class User {
-  final String username;
-  final String password;
-
-  User(this.username, this.password);
-}
-
-class UserManager {
-  final List<User> _users = [];
-
-  bool register(String username, String password) {
-    if (_users.any((user) => user.username == username)) {
-      return false; // Username already exists
-    } else {
-      _users.add(User(username, password));
-      return true;
-    }
-  }
-
-  bool authenticate(String username, String password) {
-    return _users.any((user) => user.username == username && user.password == password);
-  }
-}
-
-final UserManager userManager = UserManager();
-
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
-
-  @override
-  _LoginScreenState createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  void _login() {
-    if (userManager.authenticate(_usernameController.text, _passwordController.text)) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid username or password')),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,6 +54,83 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const SignInScreen()),
+                  );
+                },
+                child: const Text('Already have an account?'),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                  );
+                },
+                child: const Text('Sign Up'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SignInScreen extends StatefulWidget {
+  const SignInScreen({super.key});
+
+  @override
+  _SignInScreenState createState() => _SignInScreenState();
+}
+
+class _SignInScreenState extends State<SignInScreen> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isPasswordVisible = false;
+
+  void _login() {
+    // Basic authentication check
+    if (_usernameController.text == 'khuddus' && _passwordController.text == 'password') {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else {
+      // Display an error message
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Login Failed'),
+          content: const Text('Invalid username or password'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFAFAFA), // Instagram background color
+      appBar: AppBar(
+        title: const Text('Sign In'),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
               TextField(
                 controller: _usernameController,
                 decoration: const InputDecoration(
@@ -110,10 +141,20 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 20),
               TextField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: !_isPasswordVisible,
+                decoration: InputDecoration(
                   labelText: 'Password',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -121,22 +162,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: _login,
                 child: const Text('Login'),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => const SignUpScreen()),
-                  );
-                },
-                child: const Text('Don\'t have an account? Sign up'),
-              ),
             ],
           ),
         ),
       ),
     );
   }
-
-  HomeScreen() {}
 }
 
 class SignUpScreen extends StatefulWidget {
@@ -147,25 +178,49 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _newUsernameController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  bool _isPasswordVisible = false;
 
-  void _signUp() {
-    if (_passwordController.text == _confirmPasswordController.text) {
-      bool success = userManager.register(_usernameController.text, _passwordController.text);
-      if (success) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => HomeScreen()),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Username already exists')),
-        );
-      }
+  void _createAccount() {
+    // Check if the passwords match
+    if (_newPasswordController.text == _confirmPasswordController.text) {
+      // Display account created message
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Account Created'),
+          content: const Text('Account created successfully!'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                );
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
+      // Display an error message for mismatched passwords
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Sign Up Failed'),
+          content: const Text('Passwords do not match'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
       );
     }
   }
@@ -174,6 +229,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA), // Instagram background color
+      appBar: AppBar(
+        title: const Text('Sign Up'),
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -181,48 +239,55 @@ class _SignUpScreenState extends State<SignUpScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(
-                height: 100,
-                child: Image(
-                  image: NetworkImage('https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png'),
-                ),
-              ),
-              const SizedBox(height: 20),
               TextField(
-                controller: _usernameController,
+                controller: _newUsernameController,
                 decoration: const InputDecoration(
-                  labelText: 'Username',
+                  labelText: 'Create Username',
                   border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
+                controller: _newPasswordController,
+                obscureText: !_isPasswordVisible,
+                decoration: InputDecoration(
+                  labelText: 'Create Password',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: !_isPasswordVisible,
+                decoration: InputDecoration(
                   labelText: 'Confirm Password',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _signUp,
-                child: const Text('Sign Up'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Already have an account? Log in'),
+                onPressed: _createAccount,
+                child: const Text('Create Account'),
               ),
             ],
           ),
@@ -230,5 +295,4 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
-
-  HomeScreen() {}}
+}

@@ -33,7 +33,7 @@ class NewPage extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Center(
                   child: Text(
-                    'Raashii Khanna is an Indian actress who works predominantly in Telugu and Tamil films. She made her acting debut in a supporting role with the Hindi film Madras Cafe and subsequently had starring roles in the Telugu film Oohalu Gusagusalade, Tamil film Imaikkaa Nodigal and Malayalam film Villain',
+                    'Ashwatthama was the son of Guru Dronacharya – the teacher of both Kauravas and the Pandavas. Guru Dronacharya, or Guru Drona (as often called) was a brilliant sage, adept in the art of warfare and master of the divine weapons or astra. Guru Dronas son, Ashwathama was born with a mani or a divine gem on his forehead.',
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 18, // Adjusted font size for better readability
